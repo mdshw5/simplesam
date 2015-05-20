@@ -7,12 +7,15 @@ Requiring no external dependencies (except a samtools installation for BAM readi
 # Usage
 
 ```python
->>> from simplesam import Reader
+>>> from simplesam import Reader, Writer
 
->>> sam_file = open('data/NA18510.sam', 'r')
->>> alignments = Reader(sam_file)
+# can also read BAM
+>>> in_file = open('data/NA18510.sam', 'r')
+>>> in_sam = Reader(in_file)
 
->>> x = next(alignments)
+>>> x = next(in_sam)
+>>> type(x)
+<class 'simplesam.Sam'>
 >>> x.qname
 'SRR011051.1022326'
 >>> x.rname
@@ -43,7 +46,7 @@ False
 {'H1': 0, 'UQ': 33, 'RG': 'SRR011051', 'H0': 0, 'MF': 130, 'Aq': 25, 'NM': 2}
 
 >>> from pprint import pprint
->>> pprint(alignments.header)
+>>> pprint(in_sam.header)
 {'@HD': OrderedDict([('VN:1.0', ['GO:none', 'SO:coordinate'])]),
  '@SQ': {'SN:1': ['LN:247249719'],
          'SN:2': ['LN:242951149'],
@@ -69,3 +72,9 @@ False
          ...}
          }
 }
+
+>>> out_file = open('test.sam', 'w')
+>>> out_sam = Writer(out_file, in_sam.header)
+>>> out_sam.write(x)
+>>> out_sam.close()
+```
