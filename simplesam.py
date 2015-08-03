@@ -23,7 +23,7 @@ try:
 except ImportError: #python2
     from _multiprocessing import Connection
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 class DefaultOrderedDict(OrderedDict):
     def __init__(self, default, items=[]):
@@ -167,7 +167,10 @@ class Reader(object):
         """ Draws every nth read from self. Returns Sam. """
         for i, line in enumerate(self.f):
             if i % n == 0:
-                yield Sam(tuple(line.rstrip().split('\t')))
+                fields = line.split('\t')
+                required = fields[:11]
+                tags = fields[11:]
+                yield Sam(*required, tags=tags)
 
     def header_as_dict(self, header):
         """ Parse the header list and return a nested dictionary. """
