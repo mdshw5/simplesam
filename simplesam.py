@@ -457,13 +457,21 @@ def decode_tag(tag_string):
     >>> decode_tag('XF:f:100.5')
     ('XF', 'f', 100.5)
     """
-    tag, data_type, data = tag_string.split(':')
+    try:
+        tag, data_type, data = tag_string.split(':')
+    except ValueError:
+        match = re.match(r'([A-Z]{2}):([iZfHB]):(\S+)', tag_string)
+        tag = match.group(1)
+        data_type = match.group(2)
+        data = match.group(3)
     if data_type == 'i':
         return (tag, data_type, int(data))
     elif data_type == 'Z':
         return (tag, data_type, data)
     elif data_type == 'f':
         return (tag, data_type, float(data))
+    elif data_type == 'A':  # this is just a special case of a character
+        return (tag, data_type, data)
     elif data_type == 'H':
         raise NotImplementedError("Hex array SAM tags are currently not parsed.")
     elif data_type == 'B':
