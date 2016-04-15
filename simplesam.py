@@ -211,7 +211,7 @@ class Reader(object):
             self.f.close()
         if self._conn == 'proc':
             self.f.close()
-            self.p.wait()
+            self.p.terminate()
 
 
 class Writer(object):
