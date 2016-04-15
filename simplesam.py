@@ -226,7 +226,6 @@ class Writer(object):
         self.file = f
         if header is not None:
             self.header = DefaultOrderedDict(OrderedDict)
-            self.header['@HD']['VN:1.0'] = ['SO:unknown']
             self.merge_header(header)
         else:
             self.header = DefaultOrderedDict(OrderedDict)
