@@ -359,7 +359,10 @@ class Sam(GenomicOrder):
         for i, b in md_match:
             ref_seq_i += int(i)
             for mismatch in b:
-                ref_seq[ref_seq_i] = mismatch
+                try:
+                    ref_seq[ref_seq_i] = mismatch
+                except IndexError:
+                    raise IndexError(str(self))
                 ref_seq_i += 1
         self._cache['parse_md'] = ref_seq
         return ref_seq
