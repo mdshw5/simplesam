@@ -362,7 +362,7 @@ class Sam(GenomicOrder):
                 try:
                     ref_seq[ref_seq_i] = mismatch
                 except IndexError:
-                    raise IndexError(str(self))
+                    raise IndexError(locals())
                 ref_seq_i += 1
         self._cache['parse_md'] = ref_seq
         return ref_seq
