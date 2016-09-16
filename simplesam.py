@@ -64,7 +64,7 @@ class Reader(object):
     def __init__(self, f, regions=False, kind=None):
         ext = None
         self.spool = None  # use this to catch alignment during reader scraping
-        self.type = kind if kind is not None else ext[1:]
+        self.type = 'sam'
         try:
             self._f_name = f.name
             _, ext = os.path.splitext(f.name)
@@ -72,6 +72,7 @@ class Reader(object):
                 self._sam_init(f)
             elif ext == '.bam' or kind == 'bam':
                 self._bam_init(f, regions)
+                self.type = 'bam'
             elif ext == '.sam' or kind == 'sam':
                 self._sam_init(f)
             else:
