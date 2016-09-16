@@ -64,7 +64,9 @@ class Reader(object):
     def __init__(self, f, regions=False, kind=None):
         ext = None
         self.spool = None  # use this to catch alignment during reader scraping
+        self.type = kind if kind is not None else ext[1:]
         try:
+            self._f_name = f.name
             _, ext = os.path.splitext(f.name)
             if f.name == '<stdin>':  # stdin stream
                 self._sam_init(f)
@@ -78,6 +80,7 @@ class Reader(object):
                 self.__exit__()
                 raise ValueError("Region support requires bam file.")
         except AttributeError:
+            self._f_name = None
             if isinstance(f, Connection):
                 self._pipe_init(f)
             else:
@@ -162,6 +165,12 @@ class Reader(object):
 
     def __iter__(self):
         return self
+        
+    def __len__(self):
+        if self.type != 'bam':
+            raise NotImplementedError("len(Reader) is only implemented for bam files.")
+        elif self.type == 'bam':
+            return sum(bam_read_count(self._f_name))
 
     def subsample(self, n):
         """ Draws every nth read from self. Returns Sam. """
@@ -491,6 +500,17 @@ def tile_region(rname, start, end, step):
         start += step
     if start < end:
         yield '%s:%d-%d' % (rname, start, end)
+        
+def bam_read_count(bamfile):
+    """ Return a tuple of the number of mapped and unmapped reads in a bam file """
+    p = Popen(['samtools', 'idxstats', bamfile], stdout=PIPE)
+    mapped = 0
+    unmapped = 0
+    for line in p.stdout:
+        rname, rlen, nm, nu = line.rstrip().split()
+        mapped += int(nm)
+        unmapped += int(nu)
+    return (mapped, unmapped)
 
 
 if __name__ == "__main__":
