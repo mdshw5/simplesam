@@ -23,7 +23,7 @@ try:
 except ImportError: #python2
     from _multiprocessing import Connection
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 class DefaultOrderedDict(OrderedDict):
     def __init__(self, default, items=[]):
