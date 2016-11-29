@@ -61,8 +61,11 @@ class GenomicOrder(object):
 
 class Reader(object):
     """ Read SAM/BAM format file using iterator. """
-    def __init__(self, f, regions=False, kind=None):
+    def __init__(self, f, regions=False, kind=None, samtools_path=None):
         ext = None
+        if samtools_path is None:
+            samtools_path = "samtools"  # Get from the PATH
+        self.samtools_path = samtools_path
         self.spool = None  # use this to catch alignment during reader scraping
         self.type = 'sam'
         try:
@@ -113,7 +116,7 @@ class Reader(object):
         self._conn = 'file'
 
     def _bam_init(self, f, regions):
-        pline = ['samtools', 'view', '-H', f.name]
+        pline = [self.samtools_path, 'view', '-H', f.name]
         try:
             p = Popen(pline, bufsize=-1, stdout=PIPE,
                       stderr=PIPE)
@@ -126,16 +129,16 @@ class Reader(object):
                 open(''.join([f.name, '.bai']))
             except EnvironmentError:
                 sys.stderr.write("BAM index not found. Attempting to index file.\n")
-                index_p = Popen(['samtools', 'index', f.name], stdout=PIPE, stderr=PIPE)
+                index_p = Popen([self.samtools_path, 'index', f.name], stdout=PIPE, stderr=PIPE)
 
                 _, err = index_p.communicate()
                 if index_p.returncode > 0 or re.search("fail", str(err)):
                     raise OSError("Indexing failed. Is the BAM file sorted?\n")
                 else:
                     sys.stderr.write("Index created successfully.\n")
-            pline = ['samtools', 'view', f.name, regions]
+            pline = [self.samtools_path, 'view', f.name, regions]
         else:
-            pline = ['samtools', 'view', f.name]
+            pline = [self.samtools_path, 'view', f.name]
         self.p = Popen(pline, bufsize=-1, stdout=PIPE,
                   stderr=PIPE)
         if PY3:
@@ -171,7 +174,7 @@ class Reader(object):
         if self.type != 'bam':
             raise NotImplementedError("len(Reader) is only implemented for bam files.")
         elif self.type == 'bam':
-            return sum(bam_read_count(self._f_name))
+            return sum(bam_read_count(self._f_name, self.samtools_path))
 
     def subsample(self, n):
         """ Draws every nth read from self. Returns Sam. """
@@ -505,9 +508,11 @@ def tile_region(rname, start, end, step):
     if start < end:
         yield '%s:%d-%d' % (rname, start, end)
         
-def bam_read_count(bamfile):
+def bam_read_count(bamfile, samtools_path=None):
     """ Return a tuple of the number of mapped and unmapped reads in a bam file """
-    p = Popen(['samtools', 'idxstats', bamfile], stdout=PIPE)
+    if samtools_path is None:
+        samtools_path = "samtools"  # Get from the PATH
+    p = Popen([samtools_path, 'idxstats', bamfile], stdout=PIPE)
     mapped = 0
     unmapped = 0
     for line in p.stdout:
