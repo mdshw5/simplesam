@@ -1,4 +1,4 @@
-[!https://img.shields.io/pypi/v/simplesam.svg?branch=master](https://pypi.python.org/pypi/simplesam)
+![https://img.shields.io/pypi/v/simplesam.svg?branch=master](https://pypi.python.org/pypi/simplesam)
 
 # Simple SAM parsing
 Requiring no external dependencies (except a samtools installation for BAM reading)
