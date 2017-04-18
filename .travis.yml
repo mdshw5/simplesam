@@ -12,7 +12,7 @@ python:
     - 'pypy3'
 install:
     - python setup.py install
-script: nosetests --with-coverage --cover-package=pyfaidx
+script: nosetests --with-doctest
 deploy:
   provider: pypi
   user: mdshw5
@@ -28,5 +28,3 @@ matrix:
     - python: 'nightly'
     - python: 'pypy3'
   fast_finish: true
-after_success:
-    - bash <(curl -s https://codecov.io/bash)
