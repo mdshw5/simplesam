@@ -29,5 +29,5 @@ setup(
                 "Topic :: Scientific/Engineering :: Bio-Informatics",
                 ],
     py_modules=['simplesam'],
-    install_requires=['six']
+    install_requires=['six', 'ordereddict']
 )
