@@ -5,12 +5,15 @@ Classes to handle alignments in the SAM format.
 Reader -> Sam
 Writer <- Sam
 """
+import sys
 try:
     from collections import OrderedDict
-except ImportError: #python 2.6
-    from ordereddict import OrderedDict
+except ImportError: #python 2.6 or 3.6+
+    if sys.version_info >= (3,6):
+        OrderedDict = dict
+    elif sys.version_info <= (2,6):
+        from ordereddict import OrderedDict
 
-import sys
 import os
 from itertools import groupby
 from subprocess import Popen, PIPE
