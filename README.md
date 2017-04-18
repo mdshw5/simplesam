@@ -1,4 +1,5 @@
 [![PyPI](https://img.shields.io/pypi/v/simplesam.svg?)](https://pypi.python.org/pypi/simplesam)
+[![Build Status](https://travis-ci.org/mdshw5/simplesam.svg?branch=master)](https://travis-ci.org/mdshw5/simplesam)
 
 # Simple SAM parsing
 Requiring no external dependencies (except a samtools installation for BAM reading)
