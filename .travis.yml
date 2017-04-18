@@ -1,0 +1,32 @@
+language: python
+sudo: false
+python:
+    - 'nightly'
+    - '3.6'
+    - '3.5'
+    - '3.4'
+    - '3.3'
+    - '2.7'
+    - '2.6'
+    - 'pypy'
+    - 'pypy3'
+install:
+    - python setup.py install
+script: nosetests --with-coverage --cover-package=pyfaidx
+deploy:
+  provider: pypi
+  user: mdshw5
+  password:
+    secure: MbSaeuitkVTZqxa0PJ3RcR1aMf+B/sMbcx2sWOo9xfLlRFDFpYWJZ0EfXWEhrVu2YWXpBsasgunTDWSi0jNcZMH92MzOC+UTVYr45LO5sy6hm4iSiAgm/DPgYWdjP0SFKr7eL/HWPS+gHvgkXL1upleX21O358bxaezoasuKFvs=
+  on:
+    all_branches: true
+    python: 2.6
+    tags: true
+    repo: mdshw5/pyfaidx
+matrix:
+  allow_failures:
+    - python: 'nightly'
+    - python: 'pypy3'
+  fast_finish: true
+after_success:
+    - bash <(curl -s https://codecov.io/bash)
