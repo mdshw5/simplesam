@@ -11,7 +11,7 @@ try:
 except ImportError: #python 2.6 or 3.6+
     if sys.version_info >= (3,6):
         OrderedDict = dict
-    elif sys.version_info <= (2,6):
+    else:
         from ordereddict import OrderedDict
 
 import os
