@@ -22,7 +22,7 @@ deploy:
     all_branches: true
     python: 2.6
     tags: true
-    repo: mdshw5/pyfaidx
+    repo: mdshw5/simplesam
 matrix:
   allow_failures:
     - python: 'nightly'
