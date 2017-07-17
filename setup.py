@@ -16,6 +16,7 @@ setup(
     author_email='mdshw5@gmail.com',
     url='http://mattshirley.com',
     description='Simple pure Python SAM parser and objects for working with SAM records',
+    long_description=open('README.md').read(),
     license='MIT',
     classifiers=[
                 "Development Status :: 3 - Alpha",
