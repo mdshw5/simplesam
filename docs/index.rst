@@ -7,6 +7,9 @@ Simple pure Python SAM parser and objects for working with SAM records
    :caption: Contents:
    index
 
+.. automodule:: simplesam
+   :members:
+   :special-members:
 
 
 Indices and tables
@@ -15,7 +18,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-.. automodule:: simplesam
-   :members:
-   :special-members:
