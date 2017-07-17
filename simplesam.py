@@ -335,7 +335,7 @@ class Sam(GenomicOrder):
         data type of the tag is interpreted from the Python object type.
 
         >>> x = Sam(tags=[])
-        >>> x['NM:i:0']
+        >>> x['NM'] = 0
         >>> x['NM']
         0
         """
