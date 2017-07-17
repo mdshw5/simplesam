@@ -1,5 +1,6 @@
 [![PyPI](https://img.shields.io/pypi/v/simplesam.svg?)](https://pypi.python.org/pypi/simplesam)
 [![Build Status](https://travis-ci.org/mdshw5/simplesam.svg?branch=master)](https://travis-ci.org/mdshw5/simplesam)
+[![Documentation Status](https://readthedocs.org/projects/simplesam/badge/?version=latest)](http://simplesam.readthedocs.io/en/latest/?badge=latest)
 
 # Simple SAM parsing
 Requiring no external dependencies (except a samtools installation for BAM reading)
@@ -8,14 +9,23 @@ Requiring no external dependencies (except a samtools installation for BAM readi
 `pip install simplesam`
 
 # Usage
+For complete module documentation visit [ReadTheDocs](https://readthedocs.org/projects/simplesam/).
+
+## Quickstart
 
 ```python
 >>> from simplesam import Reader, Writer
+```
 
+Read from SAM/BAM files
+```python
 # can also read BAM
 >>> in_file = open('data/NA18510.sam', 'r')
 >>> in_sam = Reader(in_file)
+```
 
+Access alignments using an iterator interface
+```python
 >>> x = next(in_sam)
 >>> type(x)
 <class 'simplesam.Sam'>
@@ -25,17 +35,14 @@ Requiring no external dependencies (except a samtools installation for BAM readi
 '1'
 >>> x.pos
 2
-
 >>> x.seq
 'AACCCTAACCCCTAACCCTAACCCTAACCCTACCCCTAACCCTACCCCTCC'
 >>> x.qual
 '?<:;;=;>;<<<>96;<;;99;<=3;4<<:(;,<;;/;57<;%6,=:,((3'
-
 >>> x.cigar
 '8M1I42M'
 >>> x.gapped('seq')
 'AACCCTAACCCTAACCCTAACCCTAACCCTACCCCTAACCCTACCCCTCC'
-
 >>> x.flag
 35
 >>> x.mapped
@@ -44,10 +51,12 @@ True
 False
 >>> x.secondary
 False
-
 >>> x.tags
 {'H1': 0, 'UQ': 33, 'RG': 'SRR011051', 'H0': 0, 'MF': 130, 'Aq': 25, 'NM': 2}
+```
 
+Read the SAM sequence header structure
+```python
 >>> from pprint import pprint
 >>> pprint(in_sam.header)
 {'@HD': OrderedDict([('VN:1.0', ['GO:none', 'SO:coordinate'])]),
@@ -75,7 +84,10 @@ False
          ...}
          }
 }
+```
 
+Write SAM files from `Sam` objects
+```python
 >>> out_file = open('test.sam', 'w')
 >>> out_sam = Writer(out_file, in_sam.header)
 >>> out_sam.write(x)
