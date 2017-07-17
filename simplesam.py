@@ -2,8 +2,8 @@
 """
 Classes to handle alignments in the SAM format.
 
-Reader -> Sam
-Writer <- Sam
+Reader -> Sam -> Writer
+
 """
 import sys
 try:
@@ -26,7 +26,7 @@ try:
 except ImportError: #python2
     from _multiprocessing import Connection
 
-__version__ = '0.0.5'
+__version__ = '0.1.0'
 
 class DefaultOrderedDict(OrderedDict):
     def __init__(self, default, items=[]):
@@ -63,7 +63,7 @@ class GenomicOrder(object):
 
 
 class Reader(object):
-    """ Read SAM/BAM format file using iterator. """
+    """ Read SAM/BAM format file as an iterable. """
     def __init__(self, f, regions=False, kind=None, samtools_path=None):
         ext = None
         if samtools_path is None:
@@ -94,7 +94,6 @@ class Reader(object):
                 self._sam_init(f)
 
     def _pipe_init(self, f):
-        """ Initializer for an object that is a pipe """
         header = []
         for line in iter(f.recv, ''):
             if line[0] == '@':
@@ -152,6 +151,7 @@ class Reader(object):
         self._conn = 'proc'
 
     def next(self):
+        """ Returns the next :class:`.Sam` object """
         try:
             if self.spool:  # this will be the first alignment in a SAM file or stream
                 line = self.spool.rstrip('\n\r')
@@ -172,15 +172,18 @@ class Reader(object):
 
     def __iter__(self):
         return self
-        
+
     def __len__(self):
+        """ Returns the number of reads in an indexed BAM file.
+        Not implemented for SAM files. """
         if self.type != 'bam':
-            raise NotImplementedError("len(Reader) is only implemented for bam files.")
+            raise NotImplementedError("len(Reader) is only implemented for BAM files.")
         elif self.type == 'bam':
             return sum(bam_read_count(self._f_name, self.samtools_path))
 
     def subsample(self, n):
-        """ Draws every nth read from self. Returns Sam. """
+        """ Returns an interator that draws every nth read from
+        the input file. Returns :class:`.Sam`. """
         for i, line in enumerate(self.f):
             if i % n == 0:
                 fields = line.split('\t')
@@ -199,19 +202,14 @@ class Reader(object):
             except IndexError:
                 self.header[key][fields[0]] = ['']
 
-    def merge_header(self, header):
-        for key, values in header.items():
-            for k, v in values.items():
-                self.header[key][k] = v
-
     @property
     def seqs(self):
-        """ Return just the sequence names from the @SQ library """
+        """ Return just the sequence names from the @SQ library as a generator. """
         for key in self.header['@SQ'].keys():
             yield key.split(':')[1]
 
     def tile_genome(self, width):
-        """ Return UCSC-style regions tiling 'width' """
+        """ Return a generator of UCSC-style regions tiling ``width``. """
         assert isinstance(width, int)
         for k, v in self.header['@SQ'].items():
             rname = k.split(':')[1]
@@ -231,7 +229,7 @@ class Reader(object):
 
 
 class Writer(object):
-    """ Write SAM/BAM format file """
+    """ Write SAM/BAM format file from :class:`.Sam` objects. """
     def __init__(self, f, header=None):
         try:
             _, ext = os.path.splitext(f.name)
@@ -242,25 +240,26 @@ class Writer(object):
         self.file = f
         if header is not None:
             self.header = DefaultOrderedDict(OrderedDict)
-            self.merge_header(header)
+            self._merge_header(header)
         else:
             self.header = DefaultOrderedDict(OrderedDict)
             self.header['@HD']['VN:1.0'] = ['SO:unknown']
-        self.header_dict_format()
+        self._header_dict_format()
 
-    def merge_header(self, header):
+    def _merge_header(self, header):
         for key, values in header.items():
             for k, v in values.items():
                 self.header[key][k] = v
 
-    def header_dict_format(self):
+    def _header_dict_format(self):
         for key, value in self.header.items():
             for k, v in value.items():
                 tags = '\t'.join(v)
                 self.file.write('{key}\t{k}\t{tags}\n'.format(**locals()))
 
-    def write(self, sread):
-        self.file.write(str(sread))
+    def write(self, sam):
+        """ Write the string representation of the ``sam`` :class:`.Sam` object. """
+        self.file.write(str(sam))
 
     def __enter__(self):
         return self
@@ -270,11 +269,11 @@ class Writer(object):
 
 
 class Sam(GenomicOrder):
-    """ Store fields in each line of a SAM file, provided as a tuple. """
+    """ Object representation of a SAM entry. """
     cigar_nochange = set(("M", "N", "EQ", "X", "P"))
     cigar_len = set(("M", "D", "N", "EQ", "X", "P"))
 
-    def __init__(self, qname='@', flag=4, rname='*', pos=0, mapq=255, cigar='*', rnext='*', pnext=0, tlen=0, seq='*', qual='*', tags=[]):
+    def __init__(self, qname='', flag=4, rname='*', pos=0, mapq=255, cigar='*', rnext='*', pnext=0, tlen=0, seq='*', qual='*', tags=[]):
         self.qname = qname
         self.flag = int(flag)
         self.rname = rname
@@ -291,6 +290,8 @@ class Sam(GenomicOrder):
         self.tags = None
 
     def __str__(self):
+        """ Returns the string representation of a SAM entry. Correspondes to one line
+        in the on-disk format of a SAM file. """
         if self.tags:
             tag_fields = '\t'.join([encode_tag(tag, self.tags[tag]) for tag in sorted(self.tags.keys())])
         else:
@@ -311,20 +312,39 @@ class Sam(GenomicOrder):
         return "Sam({0}:{1}:{2})".format(self.rname, self.pos, self.qname)
 
     def __len__(self):
+        """ Returns the aligned length of a SAM entry. Unaligned reads will
+        have len() == 0. """
         return sum(c[0] for c in self.cigars if c[1] in self.cigar_len)
 
-    def __getitem__(self, key):
-        if not self.tags:
-            self.tags = parse_sam_tags(self._tags)
-        return self.tags[key]
+    def __getitem__(self, tag):
+        """ Retreives the SAM tag named "tag" as a tuple: (tag_name, data). The
+        data type of the tag is interpreted as the proper Python object type.
 
-    def __setitem__(self, key, value):
+        >>> x = Sam(tags=['NM:i:0', 'ZZ:Z:xyz'])
+        >>> x['NM']
+        0
+        >>> x['ZZ']
+        'xyz'
+        """
         if not self.tags:
             self.tags = parse_sam_tags(self._tags)
-        self.tags[key] = value
+        return self.tags[tag]
+
+    def __setitem__(self, tag, data):
+        """ Stores the SAM tag named "tag" with the value "data". The
+        data type of the tag is interpreted from the Python object type.
+
+        >>> x = Sam(tags=[])
+        >>> x['NM:i:0']
+        >>> x['NM']
+        0
+        """
+        if not self.tags:
+            self.tags = parse_sam_tags(self._tags)
+        self.tags[tag] = data
 
     def index_of(self, pos):
-        """ Return the relative index from genomic position """
+        """ Return the relative index within the alignment from a genomic position 'pos' """
         i = pos - self.pos
         if i >= 0:
             return i
@@ -338,9 +358,7 @@ class Sam(GenomicOrder):
             return default_value
 
     def cigar_split(self):
-        """ CIGAR grouping function modified from:
-        https://github.com/brentp/bwa-meth
-        """
+        # https://github.com/brentp/bwa-meth
         if self.cigar == "*":
             yield (0, None)
             raise StopIteration
@@ -375,6 +393,12 @@ class Sam(GenomicOrder):
 
     @property
     def cigars(self):
+        """ Returns the CIGAR string as a tuple.
+
+        >>> x = Sam(cigar='8M2I4M1D3M')
+        >>> x.cigars
+        ((8, 'M'), (2, 'I'), (4, 'M'), (1, 'D'), (3, 'M'))
+        """
         try:
             return self._cache['cigars']
         except KeyError:
@@ -383,32 +407,49 @@ class Sam(GenomicOrder):
 
     @property
     def paired(self):
+        """ Returns True if the read is paired and
+        each segment properly aligned according to the aligner. """
         return bool(self.flag & 0x2)
 
     @property
     def mapped(self):
+        """ Returns True of the read is mapped. """
         return not (self.flag & 0x4)
 
     @property
     def secondary(self):
+        """ Returns True if the read alignment is secondary. """
         return bool(self.flag & 0x100)
 
     @property
     def reverse(self):
+        """ Returns True if ``Sam.seq`` is being reverse complemented. """
         return bool(self.flag & 0x10)
 
     @property
     def passing(self):
+        """ Returns True if the read is passing filters, such as platform/vendor quality controls. """
         return not bool(self.flag & 0x200)
 
     @property
     def duplicate(self):
+        """ Returns True if the read is a PCR or optical duplicate. """
         return bool(self.flag & 0x400)
 
     def gapped(self, attr, gap_char='-'):
-        """ Return string with all deletions wrt reference
-         represented as gaps '-' and all insertions wrt reference
-         removed.
+        """ Return a :class:`.Sam` sequence attribute or tag with all
+        deletions in the reference sequence represented as 'gap_char' and all
+        insertions in the reference sequence removed. A sequence could
+        be :class:``Sam.seq``, ``Sam.qual``, or any :class:`.Sam` tag that
+        represents an aligned sequence, such as a methylation tag for bisulfite
+        sequencing libraries.
+
+        >>> x = Sam(*'r001\t99\tref\t7\t30\t8M2I4M1D3M\t=\t37\t39\tTTAGATAAAGGATACTG\t*'.split())
+        >>> x.gapped('seq')
+        'TTAGATAAGATA-CTG'
+        >>> x = Sam(*'r001\t99\tref\t7\t30\t8M2I4M1D3M\t=\t37\t39\tTTAGATAAAGGATACTG\t*'.split(), tags=['ZM:Z:.........M....M.M'])
+        >>> x.gapped('ZM')
+        '............-M.M'
         """
         try:
             ungapped = getattr(self, attr)
@@ -430,11 +471,12 @@ class Sam(GenomicOrder):
 
     @property
     def coords(self):
+        """ Return a list of genomic coordinates for the gapped alignment. """
         return range(self.pos, self.pos + len(self))
 
     @property
     def safename(self):
-        """Return self.qname without paired-end identifier if it exists"""
+        """Return ``Sam.qname`` without paired-end identifier if it exists"""
         if self.qname[-2] == '/':
             return self.qname[:-2]
         else:
@@ -447,7 +489,9 @@ def parse_sam_tags(tagfields):
 
 
 def encode_tag(tag, data):
-    """ Write a SAM tag in the format ``TAG:TYPE:data``
+    """ Write a SAM tag in the format ``TAG:TYPE:data``. Infers the data type
+    from the Python object type.
+
     >>> encode_tag('YM', '#""9O"1@!J')
     'YM:Z:#""9O"1@!J'
     """
@@ -464,9 +508,8 @@ def encode_tag(tag, data):
 
 
 def decode_tag(tag_string):
-    """ Parse a SAM format tag to a (TAG, TYPE, data) tuple.
-
-    TYPE in A, i, f, Z, H, B
+    """ Parse a SAM format tag to a (tag, type, data) tuple. Python object
+    types for data are set using the type code. Supported type codes are: A, i, f, Z, H, B
 
     >>> decode_tag('YM:Z:#""9O"1@!J')
     ('YM', 'Z', '#""9O"1@!J')
@@ -499,7 +542,9 @@ def decode_tag(tag_string):
 
 
 def tile_region(rname, start, end, step):
-    """ Make non-overlapping tiled windows from the specified region
+    """ Make non-overlapping tiled windows from the specified region in
+    the UCSC-style string format.
+
     >>> list(tile_region('chr1', 1, 250, 100))
     ['chr1:1-100', 'chr1:101-200', 'chr1:201-250']
     >>> list(tile_region('chr1', 1, 200, 100))
@@ -510,9 +555,9 @@ def tile_region(rname, start, end, step):
         start += step
     if start < end:
         yield '%s:%d-%d' % (rname, start, end)
-        
+
 def bam_read_count(bamfile, samtools_path=None):
-    """ Return a tuple of the number of mapped and unmapped reads in a bam file """
+    """ Return a tuple of the number of mapped and unmapped reads in a BAM file """
     if samtools_path is None:
         samtools_path = "samtools"  # Get from the PATH
     p = Popen([samtools_path, 'idxstats', bamfile], stdout=PIPE)
