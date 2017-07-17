@@ -9,7 +9,7 @@ Requiring no external dependencies (except a samtools installation for BAM readi
 `pip install simplesam`
 
 # Usage
-For complete module documentation visit [ReadTheDocs](https://readthedocs.org/projects/simplesam/).
+For complete module documentation visit [ReadTheDocs](http://simplesam.readthedocs.io/en/latest/).
 
 ## Quickstart
 
