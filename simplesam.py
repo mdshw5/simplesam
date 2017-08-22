@@ -277,13 +277,13 @@ class Sam(GenomicOrder):
     _cigar_query = set(('M', 'I', 'S', '=', 'X', 'EQ'))
     # operations that do not represent an alignment
     _cigar_no_align - set(('H', 'P'))
-    _valid_cigar = cigar_ref | cigar_query | cigar_no_align
+    _valid_cigar = self.cigar_ref | self.cigar_query | self.cigar_no_align
     # operations that can be represented as aligned to the reference
-    _cigar_align = cigar_ref & cigar_query
+    _cigar_align = self.cigar_ref & self.cigar_query
     # operations that only consume the reference
-    _cigar_ref_only = _cigar_ref - _cigar_align
+    _cigar_ref_only = self._cigar_ref - self._cigar_align
     # operations that only consume the query
-    _cigar_query_only = _cigar_query - _cigar_align
+    _cigar_query_only = self._cigar_query - self._cigar_align
 
     def __init__(self, qname='', flag=4, rname='*', pos=0, mapq=255, cigar='*', rnext='*', pnext=0, tlen=0, seq='*', qual='*', tags=[]):
         self.qname = qname
