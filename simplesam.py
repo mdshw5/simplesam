@@ -277,9 +277,9 @@ class Sam(GenomicOrder):
     _cigar_query = set(('M', 'I', 'S', '=', 'X', 'EQ'))
     # operations that do not represent an alignment
     _cigar_no_align = set(('H', 'P'))
-    _valid_cigar = cigar_ref | cigar_query | cigar_no_align
+    _valid_cigar = _cigar_ref | _cigar_query | _cigar_no_align
     # operations that can be represented as aligned to the reference
-    _cigar_align = cigar_ref & cigar_query
+    _cigar_align = _cigar_ref & _cigar_query
     # operations that only consume the reference
     _cigar_ref_only = _cigar_ref - _cigar_align
     # operations that only consume the query
