@@ -331,7 +331,7 @@ class Sam(GenomicOrder):
         >>> len(x)
         16
         """
-        return sum(c[0] for c in self.cigars if c[1] in self.cigar_ref)
+        return sum(c[0] for c in self.cigars if c[1] in self._cigar_ref)
 
     def __getitem__(self, tag):
         """ Retreives the SAM tag named "tag" as a tuple: (tag_name, data). The
@@ -382,7 +382,7 @@ class Sam(GenomicOrder):
         cig_iter = groupby(self.cigar, lambda c: c.isdigit())
         for _, n in cig_iter:
             op = int("".join(n)), "".join(next(cig_iter)[1])
-            if op[1] in self.valid_cigar:
+            if op[1] in self._valid_cigar:
                 yield op
             else:
                 raise ValueError("CIGAR operation %s in record %s is invalid." % (op[1], self.qname))
