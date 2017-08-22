@@ -270,8 +270,20 @@ class Writer(object):
 
 class Sam(GenomicOrder):
     """ Object representation of a SAM entry. """
-    cigar_nochange = set(("M", "N", "EQ", "X", "P"))
-    cigar_len = set(("M", "D", "N", "EQ", "X", "P"))
+    # https://github.com/samtools/hts-specs/blob/da805be01e2ceaaa69fdde9f33c5377bf9ee6369/SAMv1.tex#L383
+    # operations that consume the reference
+    _cigar_ref = set(('M', 'D', 'N', '=', 'X', 'EQ'))
+    # operations that consume the query
+    _cigar_query = set(('M', 'I', 'S', '=', 'X', 'EQ'))
+    # operations that do not represent an alignment
+    _cigar_no_align - set(('H', 'P'))
+    _valid_cigar = cigar_ref | cigar_query | cigar_no_align
+    # operations that can be represented as aligned to the reference
+    _cigar_align = cigar_ref & cigar_query
+    # operations that only consume the reference
+    _cigar_ref_only = _cigar_ref - _cigar_align
+    # operations that only consume the query
+    _cigar_query_only = _cigar_query - _cigar_align
 
     def __init__(self, qname='', flag=4, rname='*', pos=0, mapq=255, cigar='*', rnext='*', pnext=0, tlen=0, seq='*', qual='*', tags=[]):
         self.qname = qname
@@ -312,9 +324,14 @@ class Sam(GenomicOrder):
         return "Sam({0}:{1}:{2})".format(self.rname, self.pos, self.qname)
 
     def __len__(self):
-        """ Returns the aligned length of a SAM entry. Unaligned reads will
-        have len() == 0. """
-        return sum(c[0] for c in self.cigars if c[1] in self.cigar_len)
+        """ Returns the length of the portion of ``self.seq`` aligned to the reference. Unaligned reads will
+        have len() == 0. Insertions (I) and soft-clipped portions (S) will not contribute to the aligned length. 
+        
+        >>> x = Sam(cigar='8M2I4M1D3M4S')
+        >>> len(x)
+        16
+        """
+        return sum(c[0] for c in self.cigars if c[1] in self.cigar_ref)
 
     def __getitem__(self, tag):
         """ Retreives the SAM tag named "tag" as a tuple: (tag_name, data). The
@@ -363,8 +380,47 @@ class Sam(GenomicOrder):
             yield (0, None)
             raise StopIteration
         cig_iter = groupby(self.cigar, lambda c: c.isdigit())
-        for g, n in cig_iter:
-            yield int("".join(n)), "".join(next(cig_iter)[1])
+        for _, n in cig_iter:
+            op = int("".join(n)), "".join(next(cig_iter)[1])
+            if op[1] in self.valid_cigar:
+                yield op
+            else:
+                raise ValueError("CIGAR operation %s in record %s is invalid." % (op[1], self.qname))
+                
+    def gapped(self, attr, gap_char='-'):
+        """ Return a :class:`.Sam` sequence attribute or tag with all
+        deletions in the reference sequence represented as 'gap_char' and all
+        insertions in the reference sequence removed. A sequence could
+        be :class:``Sam.seq``, ``Sam.qual``, or any :class:`.Sam` tag that
+        represents an aligned sequence, such as a methylation tag for bisulfite
+        sequencing libraries.
+
+        >>> x = Sam(*'r001\t99\tref\t7\t30\t8M2I4M1D3M\t=\t37\t39\tTTAGATAAAGGATACTG\t*'.split())
+        >>> x.gapped('seq')
+        'TTAGATAAGATA-CTG'
+        >>> x = Sam(*'r001\t99\tref\t7\t30\t8M2I4M1D3M\t=\t37\t39\tTTAGATAAAGGATACTG\t*'.split(), tags=['ZM:Z:.........M....M.M'])
+        >>> x.gapped('ZM')
+        '............-M.M'
+        """
+        try:
+            ungapped = getattr(self, attr)
+        except AttributeError:
+            ungapped = self[attr]  # get dictionary key (tag) if attribute is missing
+        if len(ungapped) != len(self.seq):
+            raise ValueError("The length of the '%s' attribute is not equal to the length of Sam.seq!" % attr) 
+        gapped = []
+        i = 0
+        for n, t in self.cigars:
+            if t in self._cigar_align:
+                gapped.extend(ungapped[i:i + n])
+                i += n
+            elif t in self._cigar_ref_only:
+                gapped.extend([gap_char] * n)
+            elif t in self._cigar_query_only:
+                i += n
+            elif t in self._cigar_no_align:
+                pass
+        return ''.join(gapped)  
 
     def parse_md(self):
         """ Return the ungapped reference sequence from the MD tag, if present.
@@ -435,39 +491,6 @@ class Sam(GenomicOrder):
     def duplicate(self):
         """ Returns True if the read is a PCR or optical duplicate. """
         return bool(self.flag & 0x400)
-
-    def gapped(self, attr, gap_char='-'):
-        """ Return a :class:`.Sam` sequence attribute or tag with all
-        deletions in the reference sequence represented as 'gap_char' and all
-        insertions in the reference sequence removed. A sequence could
-        be :class:``Sam.seq``, ``Sam.qual``, or any :class:`.Sam` tag that
-        represents an aligned sequence, such as a methylation tag for bisulfite
-        sequencing libraries.
-
-        >>> x = Sam(*'r001\t99\tref\t7\t30\t8M2I4M1D3M\t=\t37\t39\tTTAGATAAAGGATACTG\t*'.split())
-        >>> x.gapped('seq')
-        'TTAGATAAGATA-CTG'
-        >>> x = Sam(*'r001\t99\tref\t7\t30\t8M2I4M1D3M\t=\t37\t39\tTTAGATAAAGGATACTG\t*'.split(), tags=['ZM:Z:.........M....M.M'])
-        >>> x.gapped('ZM')
-        '............-M.M'
-        """
-        try:
-            ungapped = getattr(self, attr)
-        except AttributeError:
-            ungapped = self[attr]  # get dictionary key (tag) if attribute is missing
-        gapped = []
-        i = 0
-        for n, t in self.cigars:
-            if t in self.cigar_nochange:
-                gapped.extend(ungapped[i:i + n])
-                i += n
-            elif t in ("D",):
-                gapped.extend([gap_char] * n)
-            elif t in ("I", "S"):
-                i += n
-            elif t in ("H",):
-                pass
-        return ''.join(gapped)
 
     @property
     def coords(self):
