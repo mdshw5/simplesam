@@ -85,6 +85,13 @@ todo_include_todos = False
 #
 html_theme = 'alabaster'
 
+html_theme_options = {
+    'github_button': True,
+    'github_user': 'mdshw5',
+    'github_repo': 'simplesam',
+    'github_type': 'star',
+    'font_family': "Georgia, 'goudy old style', 'minion pro', 'bell mt', 'Hiragino Mincho Pro', serif",
+}
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
