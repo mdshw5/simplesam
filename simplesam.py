@@ -216,6 +216,9 @@ class Reader(object):
             seqlength = v[0].split(':')[1]
             for region in tile_region(rname, 1, int(seqlength), width):
                 yield region
+                
+    def close(self):
+        self.__exit__()
 
     def __enter__(self):
         return self
@@ -260,6 +263,9 @@ class Writer(object):
     def write(self, sam):
         """ Write the string representation of the ``sam`` :class:`.Sam` object. """
         self.file.write(str(sam))
+        
+    def close(self):
+        self.__exit__()
 
     def __enter__(self):
         return self
