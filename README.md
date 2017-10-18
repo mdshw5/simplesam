@@ -88,6 +88,7 @@ Read the SAM sequence header structure
 
 Write SAM files from `Sam` objects
 ```python
+# Reader and Writer can also use the context handler (with: statement)
 >>> out_file = open('test.sam', 'w')
 >>> out_sam = Writer(out_file, in_sam.header)
 >>> out_sam.write(x)
