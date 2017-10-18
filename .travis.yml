@@ -1,23 +1,23 @@
 language: python
 sudo: false
 python:
-    - 'nightly'
-    - '3.6'
-    - '3.5'
-    - '3.4'
-    - '3.3'
-    - '2.7'
-    - '2.6'
-    - 'pypy'
-    - 'pypy3'
+- nightly
+- '3.6'
+- '3.5'
+- '3.4'
+- '3.3'
+- '2.7'
+- '2.6'
+- pypy
+- pypy3
 install:
-    - python setup.py install
+- python setup.py install
 script: nosetests --with-doctest
 deploy:
   provider: pypi
   user: mdshw5
   password:
-    secure: MbSaeuitkVTZqxa0PJ3RcR1aMf+B/sMbcx2sWOo9xfLlRFDFpYWJZ0EfXWEhrVu2YWXpBsasgunTDWSi0jNcZMH92MzOC+UTVYr45LO5sy6hm4iSiAgm/DPgYWdjP0SFKr7eL/HWPS+gHvgkXL1upleX21O358bxaezoasuKFvs=
+    secure: LNva5qcmECtQWIZOuCpDGiNf0W3s5idcW+r9G9kFBk0yg9QYad87Zan3UPNM9hZ13G98uvxNEevEpmpgQ+fDTvwk9EYQa5oxuiNUAuuwEKyqIkW9nltltUnpFdsLkzLpLap5JA9d7z+XAOoticprFr3KzQzloDvNPWAAK0EDoVPKZjjNsq+aJKIWI/XZkotdwviDgspcUhsfH+/IWGrFu0ZeLV+FRidK1+XBkAztW6ZNk7gElk4l3GyvQUPiutN5N6YIKBrG6eyDP5jVJNKIga2PoLJGUjXUtLKt4VXa2uDMCdOSaXgwik7C4h9edkNvOoCZtdGo+YNtISiQqoA4Dukbkgkn5bqMcsE/2dJ2ENTV8DOxcG0lYy8wnnjTiAUVNaZJxd+mZPqSquMqGZH6wP7D1NGWVRTLUrrlvLd+uPKo/SC+WoJxkU6Uo0iV+B4MS895SpuigKA8apeytUmHcOm6Bz3i1yL9Y0vT8QJC2Ig48BGwVpIB75C54/vP8R+pIUMEA/1gWuLJDR+z1ju90R2eKUVergVC1PZnh9tG9PRLqKlwZDnnEUWfY7B7NfqDWe17LTMtxiX6u1/VB6U3tN+sK9ZmhWZRs46RIdiWI7haQqktrrJWIefszFmRs/dSJlF25sUGL4EKZtUjfAznrcoC2X4BlfzshJaxZ3SKaBM=
   on:
     all_branches: true
     python: 3.6
@@ -25,6 +25,6 @@ deploy:
     repo: mdshw5/simplesam
 matrix:
   allow_failures:
-    - python: 'nightly'
-    - python: 'pypy3'
+  - python: nightly
+  - python: pypy3
   fast_finish: true
