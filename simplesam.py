@@ -65,14 +65,14 @@ class Reader(object):
             _, ext = os.path.splitext(f.name)
             if f.name == '<stdin>':  # stdin stream
                 self._sam_init(f)
-            elif ext == '.bam' or (kind is not None and kind.lower() == 'bam'):
+            elif (ext is not None and ext.lower()) == '.bam' or (kind is not None and kind.lower() == 'bam'):
                 self._bam_init(f, regions)
                 self.type = 'bam'
-            elif ext == '.sam' or (kind is not None and kind.lower() == 'sam'):
+            elif (ext is not None and ext.lower()) == '.sam' or (kind is not None and kind.lower() == 'sam'):
                 self._sam_init(f)
             else:
                 self._sam_init(f)
-            if (regions and ext != '.bam' and kind is None) or (regions and kind is not None and kind != 'bam'):
+            if (regions and (ext is not None and ext.lower() != '.bam') and kind is None) or (regions and kind is not None and kind.lower() != 'bam'):
                 self.__exit__()
                 raise ValueError("Region support requires bam file.")
         except AttributeError:
