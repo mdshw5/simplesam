@@ -42,32 +42,21 @@ class GenomicOrder(object):
     def __gt__(self, other):
         if self.rname != other.rname:
             return self.rname > other.rname
-        elif self.pos != other.pos:
-            return self.pos > other.pos
-        else:
-            return str(self) > str(other)
+        return self.pos > other.pos
 
     def __lt__(self, other):
         if self.rname != other.rname:
             return self.rname < other.rname
-        elif self.pos != other.pos:
-            return self.pos < other.pos
-        else:
-            return str(self) < str(other)
+        return self.pos < other.pos
 
     def __eq__(self, other):
-        if self.rname == other.rname and self.pos == other.pos:
-            return True
-        else:
-            return False
+        return self.rname == other.rname and self.pos == other.pos
 
 
 class Reader(object):
     """ Read SAM/BAM format file as an iterable. """
-    def __init__(self, f, regions=False, kind=None, samtools_path=None):
+    def __init__(self, f, regions=False, kind=None, samtools_path="samtools"):
         ext = None
-        if samtools_path is None:
-            samtools_path = "samtools"  # Get from the PATH
         self.samtools_path = samtools_path
         self.spool = None  # use this to catch alignment during reader scraping
         self.type = 'sam'
@@ -76,10 +65,10 @@ class Reader(object):
             _, ext = os.path.splitext(f.name)
             if f.name == '<stdin>':  # stdin stream
                 self._sam_init(f)
-            elif ext == '.bam' or kind == 'bam':
+            elif ext == '.bam' or (kind is not None and kind.lower() == 'bam'):
                 self._bam_init(f, regions)
                 self.type = 'bam'
-            elif ext == '.sam' or kind == 'sam':
+            elif ext == '.sam' or (kind is not None and kind.lower() == 'sam'):
                 self._sam_init(f)
             else:
                 self._sam_init(f)
@@ -237,7 +226,7 @@ class Writer(object):
         try:
             _, ext = os.path.splitext(f.name)
             if ext == '.bam':
-                raise NotImplementedError('Bam writing support is not implemented.\n')
+                raise NotImplementedError('Bam writing support is not implemented.\n') # why not just pipe to samtools?
         except AttributeError:
             pass
         self.file = f
@@ -585,10 +574,8 @@ def tile_region(rname, start, end, step):
     if start < end:
         yield '%s:%d-%d' % (rname, start, end)
 
-def bam_read_count(bamfile, samtools_path=None):
+def bam_read_count(bamfile, samtools_path="samtools"):
     """ Return a tuple of the number of mapped and unmapped reads in a BAM file """
-    if samtools_path is None:
-        samtools_path = "samtools"  # Get from the PATH
     p = Popen([samtools_path, 'idxstats', bamfile], stdout=PIPE)
     mapped = 0
     unmapped = 0
