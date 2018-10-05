@@ -468,7 +468,7 @@ class Sam(GenomicOrder):
         
         >>> x = Sam(tags=['XU:Z:cgttttaa', 'XB:Z:cttacgttaagagttaac', 'MD:Z:75', 'NM:i:0', 'NH:i:1', 'RG:Z:1'])
         >>> sorted(x.tags.items(), key=lambda x: x[0])
-        {'XU': 'cgttttaa', 'XB': 'cttacgttaagagttaac', 'MD': '75', 'NM': 0, 'NH': 1, 'RG': '1'}
+        [('MD', '75'), ('NH', 1), ('NM', 0), ('RG', '1'), ('XB', 'cttacgttaagagttaac'), ('XU', 'cgttttaa')]
         """
         try:
             return self._cache['tags']
