@@ -26,7 +26,7 @@ try:
 except ImportError: #python2
     from _multiprocessing import Connection
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 class DefaultOrderedDict(OrderedDict):
     def __init__(self, default, items=[]):
