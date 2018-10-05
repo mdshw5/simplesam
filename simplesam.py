@@ -467,7 +467,7 @@ class Sam(GenomicOrder):
         """ Parses the tags string to a dictionary if necessary.
         
         >>> x = Sam(tags=['XU:Z:cgttttaa', 'XB:Z:cttacgttaagagttaac', 'MD:Z:75', 'NM:i:0', 'NH:i:1', 'RG:Z:1'])
-        >>> sorted(x.tags)
+        >>> sorted(x.tags, key=x.tags.get)
         {'XU': 'cgttttaa', 'XB': 'cttacgttaagagttaac', 'MD': '75', 'NM': 0, 'NH': 1, 'RG': '1'}
         """
         try:
