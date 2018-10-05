@@ -467,7 +467,8 @@ class Sam(GenomicOrder):
         try:
             return self._cache['tags']
         except KeyError:
-            self._cache['tags'] = parse_sam_tags(self._tags)        
+            self._cache['tags'] = parse_sam_tags(self._tags)
+            return self._cache['tags']
 
     @property
     def paired(self):
