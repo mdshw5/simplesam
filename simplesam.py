@@ -305,7 +305,6 @@ class Sam(GenomicOrder):
         self.qual = qual
         self._tags = tags
         self._cache = dict()
-        self.tags = None
 
     def __str__(self):
         """ Returns the string representation of a SAM entry. Correspondes to one line
@@ -349,8 +348,6 @@ class Sam(GenomicOrder):
         >>> x['ZZ']
         'xyz'
         """
-        if not self.tags:
-            self.tags = parse_sam_tags(self._tags)
         return self.tags[tag]
 
     def __setitem__(self, tag, data):
@@ -362,8 +359,6 @@ class Sam(GenomicOrder):
         >>> x['NM']
         0
         """
-        if not self.tags:
-            self.tags = parse_sam_tags(self._tags)
         self.tags[tag] = data
 
     def index_of(self, pos):
@@ -466,6 +461,13 @@ class Sam(GenomicOrder):
         except KeyError:
             self._cache['cigars'] = tuple(self.cigar_split())
             return self._cache['cigars']
+        
+    @property
+    def tags(self):
+        try:
+            return self._cache['tags']
+        except KeyError:
+            self._cache['tags'] = parse_sam_tags(self._tags)        
 
     @property
     def paired(self):
