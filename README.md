@@ -94,3 +94,14 @@ Write SAM files from `Sam` objects
 >>> out_sam.write(x)
 >>> out_sam.close()
 ```
+
+Write SAM files from `Sam` objects to stdout (allows `samtools view` compression)
+```python
+>>> from sys import stdout
+>>> stdout_sam = Writer(stdout, in_sam.header)
+>>> stdout_sam.write(x)
+>>> stdout_sam.close()
+```
+```bash
+$ python my_script_that_uses_simplesam.py | samtools view -hbo test.bam
+```
