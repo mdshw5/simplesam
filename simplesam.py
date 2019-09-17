@@ -498,7 +498,7 @@ class Sam(GenomicOrder):
 
     @property
     def coords(self):
-        """ Return a list of genomic coordinates for the gapped alignment. """
+        """ Returns a range of genomic coordinates for the query sequence positions in the gapped alignment. """
         return range(self.pos, self.pos + len(self))
 
     @property
