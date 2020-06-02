@@ -29,6 +29,8 @@ Access alignments using an iterator interface
 >>> x = next(in_sam)
 >>> type(x)
 <class 'simplesam.Sam'>
+>>> x
+Sam(1:2:SRR011051.1022326)
 >>> x.qname
 'SRR011051.1022326'
 >>> x.rname
@@ -41,18 +43,28 @@ Access alignments using an iterator interface
 '?<:;;=;>;<<<>96;<;;99;<=3;4<<:(;,<;;/;57<;%6,=:,((3'
 >>> x.cigar
 '8M1I42M'
+>>> x.cigars
+((8, 'M'), (1, 'I'), (42, 'M'))
 >>> x.gapped('seq')
 'AACCCTAACCCTAACCCTAACCCTAACCCTACCCCTAACCCTACCCCTCC'
+>>> len(x)
+50
 >>> x.flag
 35
 >>> x.mapped
+True
+>>> x.paired
 True
 >>> x.duplicate
 False
 >>> x.secondary
 False
+>>> x.coords
+[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
 >>> x.tags
 {'H1': 0, 'UQ': 33, 'RG': 'SRR011051', 'H0': 0, 'MF': 130, 'Aq': 25, 'NM': 2}
+>>> str(x)
+'SRR011051.1022326\t35\t1\t2\t255\t8M1I42M\t*\t0\t0\tAACCCTAACCCCTAACCCTAACCCTAACCCTACCCCTAACCCTACCCCTCC\t?<:;;=;>;<<<>96;<;;99;<=3;4<<:(;,<;;/;57<;%6,=:,((3\tAq:i:25\tH0:i:0\tH1:i:0\tMF:i:130\tNM:i:2\tRG:Z:SRR011051\tUQ:i:33\n'
 ```
 
 Read the SAM sequence header structure
