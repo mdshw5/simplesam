@@ -368,7 +368,7 @@ class Sam(GenomicOrder):
         # https://github.com/brentp/bwa-meth
         if self.cigar == "*":
             yield (0, None)
-            raise StopIteration
+            return
         cig_iter = groupby(self.cigar, lambda c: c.isdigit())
         for _, n in cig_iter:
             op = int("".join(n)), "".join(next(cig_iter)[1])
