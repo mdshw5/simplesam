@@ -1,5 +1,5 @@
 [![PyPI](https://img.shields.io/pypi/v/simplesam.svg?)](https://pypi.python.org/pypi/simplesam)
-[![Build Status](https://travis-ci.org/mdshw5/simplesam.svg?branch=master)](https://travis-ci.org/mdshw5/simplesam)
+[![Build Status](https://travis-ci.com/mdshw5/simplesam.svg?branch=master)](https://travis-ci.com/mdshw5/simplesam)
 [![Documentation Status](https://readthedocs.org/projects/simplesam/badge/?version=latest)](http://simplesam.readthedocs.io/en/latest/?badge=latest)
 
 # Simple SAM parsing
