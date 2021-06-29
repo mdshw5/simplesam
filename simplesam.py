@@ -235,9 +235,10 @@ class Writer(object):
             # We're appending to an empty file. Assume we need a header.
             self._merge_header(header)
             self._header_dict_write()
-        elif self.file.mode == 'a' and self.file.tell() > 0 and header:
-            raise NotImplementedError("Updating headers on existing SAM files is not supported.\n")
-        else:    
+        elif self.file.mode == 'a' and self.file.tell() > 0:
+            if header:
+                raise NotImplementedError("Updating headers on existing SAM files is not supported.\n")
+        else:
             self._merge_header(header)
             self._header_dict_write()
 
