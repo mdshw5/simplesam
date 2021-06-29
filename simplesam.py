@@ -26,7 +26,7 @@ try:
 except ImportError: #python2
     from _multiprocessing import Connection
 
-__version__ = '0.1.3.2'
+__version__ = '0.1.4.0'
 
 class DefaultOrderedDict(OrderedDict):
     def __init__(self, default, items=[]):
@@ -226,24 +226,32 @@ class Writer(object):
         try:
             _, ext = os.path.splitext(f.name)
             if ext == '.bam':
-                raise NotImplementedError('Bam writing support is not implemented.\n') # why not just pipe to samtools?
-        except AttributeError:
+                # Why not just pipe to samtools? 
+                raise NotImplementedError("Bam writing support is not implemented.\n") 
+        except AttributeError:  # pipe?
             pass
         self.file = f
-        if header is not None:
-            self.header = DefaultOrderedDict(OrderedDict)
+        if self.file.mode == 'a' and self.file.tell() == 0:
+            # We're appending to an empty file. Assume we need a header.
             self._merge_header(header)
+            self._header_dict_write()
+        elif self.file.mode == 'a' and self.file.tell() > 0:
+            if header:
+                raise NotImplementedError("Updating headers on existing SAM files is not supported.\n")
         else:
-            self.header = DefaultOrderedDict(OrderedDict)
-            self.header['@HD']['VN:1.0'] = ['SO:unknown']
-        self._header_dict_format()
+            self._merge_header(header)
+            self._header_dict_write()
 
     def _merge_header(self, header):
-        for key, values in header.items():
-            for k, v in values.items():
-                self.header[key][k] = v
+        self.header = DefaultOrderedDict(OrderedDict)
+        if not header:
+            self.header['@HD']['VN:1.0'] = ['SO:unknown']
+        else:
+            for key, values in header.items():
+                for k, v in values.items():
+                    self.header[key][k] = v
 
-    def _header_dict_format(self):
+    def _header_dict_write(self):
         for key, value in self.header.items():
             for k, v in value.items():
                 tags = '\t'.join(v)
