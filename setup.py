@@ -29,5 +29,6 @@ setup(
                 "Topic :: Scientific/Engineering :: Bio-Informatics",
                 ],
     py_modules=['simplesam'],
+    scripts=['scripts/pileup.py'],
     install_requires=['six', 'ordereddict']
 )

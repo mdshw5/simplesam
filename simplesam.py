@@ -205,7 +205,7 @@ class Reader(object):
             seqlength = v[0].split(':')[1]
             for region in tile_region(rname, 1, int(seqlength), width):
                 yield region
-                
+
     def close(self):
         self.__exit__()
 
@@ -226,8 +226,8 @@ class Writer(object):
         try:
             _, ext = os.path.splitext(f.name)
             if ext == '.bam':
-                # Why not just pipe to samtools? 
-                raise NotImplementedError("Bam writing support is not implemented.\n") 
+                # Why not just pipe to samtools?
+                raise NotImplementedError("Bam writing support is not implemented.\n")
         except AttributeError:  # pipe?
             pass
         self.file = f
@@ -260,7 +260,7 @@ class Writer(object):
     def write(self, sam):
         """ Write the string representation of the ``sam`` :class:`.Sam` object. """
         self.file.write(str(sam))
-        
+
     def close(self):
         self.__exit__()
 
@@ -327,8 +327,8 @@ class Sam(GenomicOrder):
 
     def __len__(self):
         """ Returns the length of the portion of ``self.seq`` aligned to the reference. Unaligned reads will
-        have len() == 0. Insertions (I) and soft-clipped portions (S) will not contribute to the aligned length. 
-        
+        have len() == 0. Insertions (I) and soft-clipped portions (S) will not contribute to the aligned length.
+
         >>> x = Sam(cigar='8M2I4M1D3M4S')
         >>> len(x)
         16
@@ -384,7 +384,7 @@ class Sam(GenomicOrder):
                 yield op
             else:
                 raise ValueError("CIGAR operation %s in record %s is invalid." % (op[1], self.qname))
-                
+
     def gapped(self, attr, gap_char='-'):
         """ Return a :class:`.Sam` sequence attribute or tag with all
         deletions in the reference sequence represented as 'gap_char' and all
@@ -405,7 +405,7 @@ class Sam(GenomicOrder):
         except AttributeError:
             ungapped = self[attr]  # get dictionary key (tag) if attribute is missing
         if len(ungapped) != len(self.seq):
-            raise ValueError("The length of the '%s' attribute is not equal to the length of Sam.seq!" % attr) 
+            raise ValueError("The length of the '%s' attribute is not equal to the length of Sam.seq!" % attr)
         gapped = []
         i = 0
         for n, t in self.cigars:
@@ -418,7 +418,7 @@ class Sam(GenomicOrder):
                 i += n
             elif t in self._cigar_no_align:
                 pass
-        return ''.join(gapped)  
+        return ''.join(gapped)
 
     def parse_md(self):
         """ Return the ungapped reference sequence from the MD tag, if present.
@@ -458,11 +458,11 @@ class Sam(GenomicOrder):
         except KeyError:
             self._cache['cigars'] = tuple(self.cigar_split())
             return self._cache['cigars']
-        
+
     @property
     def tags(self):
         """ Parses the tags string to a dictionary if necessary.
-        
+
         >>> x = Sam(tags=['XU:Z:cgttttaa', 'XB:Z:cttacgttaagagttaac', 'MD:Z:75', 'NM:i:0', 'NH:i:1', 'RG:Z:1'])
         >>> sorted(x.tags.items(), key=lambda x: x[0])
         [('MD', '75'), ('NH', 1), ('NM', 0), ('RG', '1'), ('XB', 'cttacgttaagagttaac'), ('XU', 'cgttttaa')]
