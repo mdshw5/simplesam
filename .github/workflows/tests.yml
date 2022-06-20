@@ -3,13 +3,13 @@ name: Tests
 # Controls when the action will run.
 on:
   push:
-  	branches:
-		  - master
+    branches:
+      - master
   pull_request:
 
 jobs:
   build:
-	  runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
 	  strategy:
 	    matrix:
