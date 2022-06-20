@@ -3,36 +3,36 @@ name: Tests
 # Controls when the action will run.
 on:
   push:
-	  branches:
-		- master
+  	branches:
+		  - master
   pull_request:
 
 jobs:
   build:
-	runs-on: ${{ matrix.os }}
+	  runs-on: ${{ matrix.os }}
 
-	strategy:
-	  matrix:
-		python: [3.6.15, 3.7.12, 3.8.12, 3.9.10, 3.10.2]
-		os: [ubuntu-latest, macos-latest]
+	  strategy:
+	    matrix:
+		    python: [3.6.15, 3.7.12, 3.8.12, 3.9.10, 3.10.2]
+		    os: [ubuntu-latest, macos-latest]
 
-	steps:
-	  - name: Checkout
-		uses: actions/checkout@v2.3.1
-		with:
-		  persist-credentials: false
-		  fetch-depth: 0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
 
-	  - name: Setup Python
-		uses: actions/setup-python@v2
-		with:
-		  python-version: ${{ matrix.python }}
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
 
-	  - name: Install pytest
-	    run: pip install pytest
+      - name: Install pytest
+        run: pip install pytest
 
-	  - name: Install package
-		run: python setup.py install
+      - name: Install package
+        run: python setup.py install
 
-	  - name: Run tests
-		run: pytest --doctest-modules
+      - name: Run tests
+        run: pytest --doctest-modules
