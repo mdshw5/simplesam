@@ -20,13 +20,14 @@ from subprocess import Popen, PIPE
 from io import TextIOWrapper
 import re
 from six import PY3, string_types
+from pkg_resources import get_distribution
 
 try:
     from multiprocessing.dummy.connection import Connection
 except ImportError: #python2
     from _multiprocessing import Connection
 
-__version__ = '0.1.4.0'
+__version__ = get_distribution("simplesam").version
 
 class DefaultOrderedDict(OrderedDict):
     def __init__(self, default, items=[]):

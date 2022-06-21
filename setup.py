@@ -1,17 +1,10 @@
 from setuptools import setup
 import os.path
 
-
-def get_version(string):
-    """ Parse the version number variable __version__ from a script. """
-    import re
-    version_re = r"^__version__ = ['\"]([^'\"]*)['\"]"
-    version_str = re.search(version_re, string, re.M).group(1)
-    return version_str
-
 setup(
     name='simplesam',
-    version=get_version(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'simplesam.py')).read()),
+    use_scm_version={"local_scheme": "no-local-version"},
+    setup_requires=['setuptools_scm'],
     author='Matthew Shirley',
     author_email='mdshw5@gmail.com',
     url='http://mattshirley.com',
