@@ -39,3 +39,10 @@ Thumbs.db
 # Editor backup files #
 #######################
 *~
+
+# Python #
+venv
+*.egg
+*.pyc
+*.egg-info*
+build
