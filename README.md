@@ -1,5 +1,6 @@
 [![PyPI](https://img.shields.io/pypi/v/simplesam.svg?)](https://pypi.python.org/pypi/simplesam)
-[![Build Status](https://travis-ci.com/mdshw5/simplesam.svg?branch=master)](https://travis-ci.com/mdshw5/simplesam)
+[![Tests](https://github.com/mdshw5/simplesam/actions/workflows/tests.yml/badge.svg)](https://github.com/mdshw5/simplesam/actions/workflows/tests.yml)
+[![Package Builds](https://github.com/mdshw5/simplesam/actions/workflows/deploy.yml/badge.svg)](https://github.com/mdshw5/simplesam/actions/workflows/deploy.yml)
 [![Documentation Status](https://readthedocs.org/projects/simplesam/badge/?version=latest)](http://simplesam.readthedocs.io/en/latest/?badge=latest)
 
 # Simple SAM parsing
