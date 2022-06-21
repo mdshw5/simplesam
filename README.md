@@ -117,3 +117,27 @@ Write SAM files from `Sam` objects to stdout (allows `samtools view` compression
 ```bash
 $ python my_script_that_uses_simplesam.py | samtools view -hbo test.bam
 ```
+
+# Example scripts
+An example script [`pileup.py`](https://github.com/mdshw5/simplesam/blob/master/scripts/pileup.py) is installed with this module.
+This script will generate an output that is similar to `samtools pileup` with the addition of several optional columns that summarize
+counts for individual nucleotides (ACTGN) and deletions with respect to the reference (-). This script leverages the `Sam.gapped()` and
+`Sam.parse_md()` methods to reconstruct position-specific counts from SAM alignment records.
+
+```bash
+$ pileup.py -h
+usage: pileup [-h] [--version] [-c] [-i STATS] bam pileup
+
+generate a simple pileup-like file from a sorted/indexed BAM file
+
+positional arguments:
+  bam                   sorted/indexed BAM file
+  pileup                pileup output file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+  -c, --counts          display counts for A/C/T/G/N/- separately (default: False)
+  -i STATS, --stats STATS
+                        tabulate mismatches to output file
+```
