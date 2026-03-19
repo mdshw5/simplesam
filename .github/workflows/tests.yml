@@ -45,7 +45,7 @@ jobs:
           source venv/bin/activate
           echo PATH=$PATH >> $GITHUB_ENV
 
-     - name: upgrade pip
+      - name: upgrade pip
         run: python3 -m pip install --upgrade pip
 
       - name: install pytest
