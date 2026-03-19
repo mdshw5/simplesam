@@ -12,19 +12,29 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      fail-fast: false
+      max-parallel: 10
       matrix:
-        python: [3.6.15, 3.7.12, 3.8.12, 3.9.10, 3.10.2]
+        python-version: ['3.13', '3.12', '3.11', '3.10', '3.9']
         os: [ubuntu-latest, macos-latest]
+        exclude:
+          # mac os: exclude all but the last two (available) python releases
+          - os: macos-latest
+            python-version: 3.11
+          - os: macos-latest
+            python-version: 3.10
+          - os: macos-latest
+            python-version: 3.9
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.1
+        uses: actions/checkout@v3.1.0
         with:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - name: Setup python
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: ${{ matrix.python }}
 

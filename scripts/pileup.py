@@ -2,7 +2,11 @@
 
 import sys
 import argparse
-import pkg_resources
+try:
+    from importlib.metadata import version
+except ImportError:
+    import pkg_resources
+    version = lambda name: pkg_resources.get_distribution(name).version
 from collections import deque
 from collections import Counter
 from collections import OrderedDict
@@ -80,7 +84,7 @@ def pileup(args):
 
 def main():
 	parser = argparse.ArgumentParser(prog='pileup', description="generate a simple pileup-like file from a sorted/indexed BAM file")
-	parser.add_argument('--version', action='version', version="%(prog)s version {0}".format(pkg_resources.get_distribution("simplesam").version))
+	parser.add_argument('--version', action='version', version="%(prog)s version {0}".format(version("simplesam")))
 
 	parser.add_argument('bam', type=argparse.FileType('r'), help="sorted/indexed BAM file ")
 	parser.add_argument('pileup', type=argparse.FileType('w'), help="pileup output file")
