@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-
+    
     strategy:
       fail-fast: false
       max-parallel: 10
@@ -27,22 +27,32 @@ jobs:
             python-version: 3.9
 
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v3.1.0
         with:
           persist-credentials: false
           fetch-depth: 0
-
-      - name: Setup python
+          
+      - name: setup python
         uses: actions/setup-python@v4.3.0
         with:
           python-version: ${{ matrix.python }}
 
-      - name: Install pytest
-        run: pip install pytest
 
-      - name: Install package
-        run: python setup.py install
+      - name: set up virtual env
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          echo PATH=$PATH >> $GITHUB_ENV
 
-      - name: Run tests
+     - name: upgrade pip
+        run: python3 -m pip install --upgrade pip
+
+      - name: install pytest
+        run: python3 -m pip install pytest
+
+      - name: install package from current branch
+        run: python3 -m pip install .
+
+      - name: run tests
         run: pytest --doctest-modules
