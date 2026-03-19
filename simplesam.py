@@ -31,7 +31,11 @@ try:
 except ImportError: #python2
     from _multiprocessing import Connection
 
-__version__ = version("simplesam")
+__version__ = "unknown"
+try:
+    __version__ = version("simplesam")
+except Exception:
+    pass
 
 class DefaultOrderedDict(OrderedDict):
     def __init__(self, default, items=[]):
